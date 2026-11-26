@@ -48,6 +48,10 @@ export const OPCOES_DOCX_A4: Record<string, unknown> = {
     row: { cantSplit: true },
     addSpacingAfter: true,
   },
+  imageProcessing: {
+    svgHandling: 'native',
+    suppressSharpWarning: true,
+  },
   decodeUnicode: true,
 };
 

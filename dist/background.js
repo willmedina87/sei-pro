@@ -128,6 +128,7 @@ browser.runtime.onConnect.addListener(function (porta) {
   if (!porta || porta.name !== "agente-vivo") return;
   portasDoAgente.push(porta);
   porta.onDisconnect.addListener(function () {
+    void browser.runtime.lastError;
     portasDoAgente = portasDoAgente.filter(function (p) { return p !== porta; });
   });
 });

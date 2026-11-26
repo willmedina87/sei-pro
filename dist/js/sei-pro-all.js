@@ -488,9 +488,11 @@ function setOnClickExcluirProcBloco() {
     var table = $('#frmRelBlocoProtocoloLista .infraTable');
     if (table.length > 0) {
         table.find('a[onclick*="acaoExcluir("]').on('click', function(event){
-            var id_procedimento = $(event.currentTarget).attr('href').split('-')[1];
+            var href = $(event.currentTarget).attr('href') || '';
+            var id_procedimento = href.split('-')[1];
+            if (!id_procedimento) return;
             var listProcessos = sessionStorageRestorePro('dadosSessionProcessoPro');
-            var objIndexDoc = (!listProcessos) ? -1 : listProcessos.findIndex((obj => obj.listAndamento.id_procedimento == String(id_procedimento)));
+            var objIndexDoc = (!Array.isArray(listProcessos)) ? -1 : listProcessos.findIndex((obj => obj && obj.listAndamento && obj.listAndamento.id_procedimento == String(id_procedimento)));
             if (objIndexDoc !== -1) {
                 listProcessos[objIndexDoc].listAndamento.historico_completo = false;
                 sessionStorageStorePro('dadosSessionProcessoPro', listProcessos);
