@@ -27,6 +27,7 @@ const armazemFalso = () => {
 export function verificarLargura(): void {
   secao("largura do documento e botoes do canto");
   checar("rotulo a partir do tooltip do SEI Pro", rotuloDoBotao("return infraTooltipMostrar('Baixar documento (DOCX)')") === "Baixar DOCX");
+  checar("rotulo do botao Google Docs", rotuloDoBotao("return infraTooltipMostrar('Exportar para Google Docs')") === "Google Docs");
   checar("tooltip desconhecido nao gera rotulo", rotuloDoBotao("return infraTooltipMostrar('Outra coisa')") === "");
 
   const arm = armazemFalso();

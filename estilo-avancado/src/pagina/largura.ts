@@ -83,7 +83,9 @@ export function iframeMostraDocumento(doc: Document): boolean {
 /** Rótulo curto de um botão só de ícone, a partir do tooltip do SEI Pro ("Baixar documento (DOCX)" -> "Baixar DOCX"). */
 export function rotuloDoBotao(tooltip: string): string {
   const m = /Baixar documento \(([^)]+)\)/i.exec(tooltip);
-  return m ? `Baixar ${m[1]}` : "";
+  if (m) return `Baixar ${m[1]}`;
+  if (/Google Docs/i.test(tooltip)) return "Google Docs";
+  return "";
 }
 
 /**

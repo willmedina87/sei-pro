@@ -2,7 +2,7 @@
 
 ## ![SEI Pro Baixar documento](../img/icon-baixardocumento.png) Abrir em nova aba e baixar documento em Word ou HTML
 
-Os documentos gerados no SEI só podem ser vistos dentro da árvore do processo ou impressos. O SEI Pro acrescenta, no canto do visualizador, três botões para **abrir o documento em uma aba só dele** e **baixar uma cópia editável** — em **Word (.docx)** ou em **HTML**.
+Os documentos gerados no SEI só podem ser vistos dentro da árvore do processo ou impressos. O SEI Pro acrescenta, no canto do visualizador, botões para **abrir o documento em uma aba só dele**, **baixar uma cópia editável** — em **Word (.docx)** ou em **HTML** — ou **exportar diretamente para o Google Docs**.
 
 > ![Tela Baixar documento](../img/tela-baixardocumento.gif)
 
@@ -14,7 +14,8 @@ Ao clicar num documento gerado no SEI, aparecem no alto, à direita do documento
 | ----- | --------- |
 | **Abrir documento em nova aba** | Mostra só o documento, em tela cheia, numa nova aba — bom para ler, comparar lado a lado ou imprimir |
 | **Baixar documento (HTML)** | Salva o documento como página HTML, que abre em qualquer navegador |
-| **Baixar documento (DOCX)** | Salva o documento como arquivo do **Word**, que abre também no LibreOffice e no Google Docs |
+| **Baixar documento (DOCX)** | Salva o documento como arquivo do **Word** (A4, com tabelas, bordas, recuos e imagens preservados), que abre também no LibreOffice e no Google Docs |
+| **Exportar para Google Docs** | Copia o documento formatado (com tabelas, bordas, recuos e imagens) para a área de transferência e abre um novo documento no **Google Docs** (`docs.new`) pronto para colar (`Ctrl+V`) |
 
 O arquivo recebe o nome do documento e o número SEI — por exemplo, `Despacho teste (SEI nº 0094793).docx`.
 

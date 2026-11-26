@@ -4945,14 +4945,17 @@ function insertIconNewTab() {
     if (typeof id_documento !== 'undefined') {
         var listLinks = arrayLinksArvoreAll.filter(function(v){ return (v.indexOf('id_documento='+id_documento) !== -1 && v.indexOf('documento_visualizar') !== -1) });
         if (listLinks.length > 0 && listLinks[0] != '') {
-            var html =  '<a class="openNewTab" style="margin: 10px 5px;padding: 5px;border-radius: 5px 0 0 5px;background-color: #eaeaea;color: #666;text-decoration: none;right: 60px;position: absolute;user-select: none;" href="'+url_host.replace('controlador.php','')+listLinks[0]+'" target="_blank">'+
+            var html =  '<a class="openNewTab" style="margin: 10px 5px;padding: 5px;border-radius: 5px 0 0 5px;background-color: #eaeaea;color: #666;text-decoration: none;right: 84px;position: absolute;user-select: none;" href="'+url_host.replace('controlador.php','')+listLinks[0]+'" target="_blank">'+
                         '   <i class="fas fa-external-link-square-alt" style="color:#4285f4"></i> Abrir documento em nova aba'+
                         '</a>'+
-                        '<a class="openNewTab" data-id_protocolo="'+id_documento+'" onmouseout="return infraTooltipOcultar();" onmouseover="return infraTooltipMostrar(\'Baixar documento (HTML)\')" style="margin: 10px 5px;padding: 5px;border-radius: 0;background-color: #eaeaea;color: #666;text-decoration: none;right: 40px;position: absolute;user-select: none;" onclick="parent.downloadDocumentVisualizacao(this)" target="_blank">'+
+                        '<a class="openNewTab" data-id_protocolo="'+id_documento+'" onmouseout="return infraTooltipOcultar();" onmouseover="return infraTooltipMostrar(\'Baixar documento (HTML)\')" style="margin: 10px 5px;padding: 5px;border-radius: 0;background-color: #eaeaea;color: #666;text-decoration: none;right: 62px;position: absolute;user-select: none;" onclick="parent.downloadDocumentVisualizacao(this)" target="_blank">'+
                         '   <i class="fas fa-download" style="color:#4285f4"></i>'+
                         '</a>'+
-                        '<a class="openNewTab" data-id_protocolo="'+id_documento+'" onmouseout="return infraTooltipOcultar();" onmouseover="return infraTooltipMostrar(\'Baixar documento (DOCX)\')" style="margin: 10px 5px;padding: 5px;border-radius: 0 5px 5px 0;background-color: #eaeaea;color: #666;text-decoration: none;right: 20px;position: absolute;user-select: none;" onclick="parent.downloadDocxVisualizacao(this)" target="_blank">'+
+                        '<a class="openNewTab" data-id_protocolo="'+id_documento+'" onmouseout="return infraTooltipOcultar();" onmouseover="return infraTooltipMostrar(\'Baixar documento (DOCX)\')" style="margin: 10px 5px;padding: 5px;border-radius: 0;background-color: #eaeaea;color: #666;text-decoration: none;right: 41px;position: absolute;user-select: none;" onclick="parent.downloadDocxVisualizacao(this)" target="_blank">'+
                         '   <i class="fas fa-file-word" style="color:#4285f4"></i>'+
+                        '</a>'+
+                        '<a class="openNewTab" data-id_protocolo="'+id_documento+'" onmouseout="return infraTooltipOcultar();" onmouseover="return infraTooltipMostrar(\'Exportar para Google Docs\')" style="margin: 10px 5px;padding: 5px;border-radius: 0 5px 5px 0;background-color: #eaeaea;color: #666;text-decoration: none;right: 20px;position: absolute;user-select: none;" onclick="parent.exportarGoogleDocsVisualizacao(this)" target="_blank">'+
+                        '   <i class="fab fa-google-drive" style="color:#4285f4"></i>'+
                         '</a>';
 
                 ifrVisualizacao.find('.openNewTab').remove()
@@ -4997,58 +5000,30 @@ function downloadDocumentVisualizacao(this_) {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
-function transformDirectTextNodes(el, tt) {
-    for (var c = el.firstChild; c; c = c.nextSibling) {
-        if (c.nodeType === 3 && c.nodeValue) {
-            if (tt === 'uppercase') { c.nodeValue = c.nodeValue.toUpperCase(); }
-            else if (tt === 'lowercase') { c.nodeValue = c.nodeValue.toLowerCase(); }
-            else { c.nodeValue = c.nodeValue.replace(/(^|\s)(\S)/g, function(m, a, b){ return a + b.toUpperCase(); }); }
-        }
-    }
+function carregarScriptsExportacaoDoc(libs, onReady) {
+    var fila = libs.slice();
+    (function loadNext() {
+        if (!fila.length) { onReady(); return; }
+        $.getScript(URL_SPRO + fila.shift(), loadNext);
+    })();
 }
-function inlineDocxStyles(origRoot, cloneRoot) {
-    // O TurboDocx so aplica estilo inline; o SEI estiliza por classe num bloco <style>.
-    // Le o estilo computado (no documento ja renderizado) e copia inline para o clone.
-    var win = origRoot.ownerDocument ? origRoot.ownerDocument.defaultView : null;
-    if (!win || !win.getComputedStyle) { return; }
-    var origEls = origRoot.querySelectorAll('*');
-    var cloneEls = cloneRoot.querySelectorAll('*');
-    var n = Math.min(origEls.length, cloneEls.length);
-    for (var i = 0; i < n; i++) {
-        var oe = origEls[i], ce = cloneEls[i];
-        var tag = oe.nodeName;
-        if (tag === 'STYLE' || tag === 'SCRIPT' || tag === 'HEAD' || tag === 'META' || tag === 'LINK' || tag === 'TITLE') { continue; }
-        var cs = win.getComputedStyle(oe);
-        var add = [];
-        var ta = cs.textAlign;
-        if (ta === 'center' || ta === 'right' || ta === 'justify') { add.push('text-align:'+ta); }
-        var fw = cs.fontWeight;
-        if (fw === 'bold' || fw === 'bolder' || parseInt(fw, 10) >= 600) { add.push('font-weight:bold'); }
-        if (cs.fontStyle === 'italic') { add.push('font-style:italic'); }
-        var tdec = (cs.textDecorationLine || cs.textDecoration || '');
-        if (tdec.indexOf('underline') !== -1) { add.push('text-decoration:underline'); }
-        else if (tdec.indexOf('line-through') !== -1) { add.push('text-decoration:line-through'); }
-        var fs = cs.fontSize;
-        if (fs && fs.indexOf('px') !== -1) {
-            var pt = Math.round(parseFloat(fs) * 0.75 * 10) / 10;
-            if (pt) { add.push('font-size:'+pt+'pt'); }
-        }
-        var ff = cs.fontFamily;
-        if (ff) { add.push('font-family:'+ff.replace(/["']/g, '').split(',')[0].trim()); }
-        var col = cs.color;
-        if (col && col !== 'rgb(0, 0, 0)' && col.indexOf('rgba(0, 0, 0, 0)') === -1) { add.push('color:'+col); }
-        var bg = cs.backgroundColor;
-        if (bg && bg !== 'transparent' && bg.indexOf('rgba(0, 0, 0, 0)') === -1) { add.push('background-color:'+bg); }
-        if (add.length) {
-            var prev = ce.getAttribute('style') || '';
-            if (prev && prev.charAt(prev.length - 1) !== ';') { prev += ';'; }
-            ce.setAttribute('style', prev + add.join(';') + ';');
-        }
-        var tt = cs.textTransform;
-        if (tt === 'uppercase' || tt === 'lowercase' || tt === 'capitalize') {
-            transformDirectTextNodes(ce, tt);
-        }
-    }
+function mostrarAvisoExportacaoDoc(mensagem, erro) {
+    var anterior = document.getElementById('spro-aviso-exportar-doc');
+    if (anterior) anterior.remove();
+    var aviso = document.createElement('div');
+    aviso.id = 'spro-aviso-exportar-doc';
+    aviso.setAttribute('data-spro-ui', '');
+    aviso.textContent = mensagem;
+    aviso.style.cssText =
+        'position:fixed;right:20px;bottom:20px;z-index:2147483647;max-width:380px;' +
+        'padding:12px 16px;border-radius:8px;font:500 13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;' +
+        'color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.22);transition:opacity .25s;' +
+        'background:' + (erro ? '#c62828' : '#1a73e8') + ';';
+    document.body.appendChild(aviso);
+    setTimeout(function() {
+        aviso.style.opacity = '0';
+        setTimeout(function() { aviso.remove(); }, 280);
+    }, 5000);
 }
 async function downloadDocxVisualizacao(this_) {
     var this_ = $(this_);
@@ -5056,6 +5031,7 @@ async function downloadDocxVisualizacao(this_) {
     var ifrVisualizacao = $($ifrVisualizacao).contents();
     var ifrArvore = $('#ifrArvore').contents();
     var ifrArvoreHtml = ifrVisualizacao.find($ifrArvoreHtml).contents();
+    var origDoc = ifrArvoreHtml[0];
 
     var doc = ifrArvore.find('#anchor'+data.id_protocolo);
     var nameDoc = doc.text().trim();
@@ -5067,44 +5043,13 @@ async function downloadDocxVisualizacao(this_) {
     var icon = this_.find('i');
     icon.attr('class','fas fa-spinner fa-spin');
 
-    // Clona o <html> do iframe aninhado para nao alterar o documento exibido
-    var origHtml = ifrArvoreHtml.find('html')[0];
-    var htmlEl = origHtml.cloneNode(true);
-
-    // O SEI estiliza por classe (centralizacao, negrito, maiusculas, fonte) e o TurboDocx
-    // so honra estilo inline; copia o estilo computado de cada elemento para o clone.
-    inlineDocxStyles(origHtml, htmlEl);
-
-    // Embute as imagens (mesma origem controlador.php, sessao autenticada) como data: URI.
-    // O TurboDocx so embute imagens em data: URI; isso deixa o DOCX autossuficiente.
-    var imgs = Array.prototype.slice.call(htmlEl.querySelectorAll('img'));
-    await Promise.all(imgs.map(function(img) {
-        var src = img.getAttribute('src');
-        if (!src || src.indexOf('data:') === 0) return Promise.resolve();
-        return fetch(img.src, { credentials: 'include' })
-            .then(function(resp){ return resp.blob(); })
-            .then(function(blob){
-                return new Promise(function(res){
-                    var reader = new FileReader();
-                    reader.onload = function(){ img.setAttribute('src', reader.result); res(); };
-                    reader.onerror = function(){ res(); };
-                    reader.readAsDataURL(blob);
-                });
-            })
-            .catch(function(){ /* mantem o src original se o fetch falhar */ });
-    }));
-
-    var fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'+htmlEl.outerHTML+'</body></html>';
-    // O TurboDocx emite espaco inquebravel (nbsp) com codificacao dupla (vira A-circunflexo no Word);
-    // troca espaco inquebravel por espaco comum.
-    fullHtml = fullHtml.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
-
     var build = function() {
-        Promise.resolve(HTMLToDOCX(fullHtml, null, { font: 'Arial', orientation: 'portrait' }))
+        if (!origDoc || !origDoc.body || typeof SeiProExportarDoc === 'undefined') {
+            icon.attr('class','fas fa-file-word');
+            return;
+        }
+        SeiProExportarDoc.gerarBlobDocx(origDoc, HTMLToDOCX, { titulo: nameFile })
             .then(function(blob) {
-                if (!(blob instanceof Blob)) {
-                    blob = new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-                }
                 var downloadLink = document.createElement('a');
                 var url = URL.createObjectURL(blob);
                 downloadLink.href = url;
@@ -5118,6 +5063,7 @@ async function downloadDocxVisualizacao(this_) {
             })
             .catch(function(err) {
                 console.error('SEI Pro: erro ao gerar DOCX', err);
+                mostrarAvisoExportacaoDoc('Nao foi possivel gerar o arquivo DOCX.', true);
                 icon.attr('class','fas fa-file-word');
             });
     };
@@ -5127,10 +5073,43 @@ async function downloadDocxVisualizacao(this_) {
     var libs = [];
     if (typeof Buffer === 'undefined') libs.push('js/lib/buffer.min.js');
     if (typeof HTMLToDOCX === 'undefined') libs.push('js/lib/html-to-docx.browser.js');
-    (function loadNext() {
-        if (!libs.length) { build(); return; }
-        $.getScript(URL_SPRO+libs.shift(), loadNext);
-    })();
+    if (typeof SeiProExportarDoc === 'undefined') libs.push('js/lib/sei-pro-exportar-doc.js');
+    carregarScriptsExportacaoDoc(libs, build);
+}
+async function exportarGoogleDocsVisualizacao(this_) {
+    var this_ = $(this_);
+    var ifrVisualizacao = $($ifrVisualizacao).contents();
+    var ifrArvoreHtml = ifrVisualizacao.find($ifrArvoreHtml).contents();
+    var origDoc = ifrArvoreHtml[0];
+
+    var icon = this_.find('i');
+    icon.attr('class','fas fa-spinner fa-spin');
+
+    var executar = function() {
+        if (!origDoc || !origDoc.body || typeof SeiProExportarDoc === 'undefined') {
+            icon.attr('class','fab fa-google-drive');
+            return;
+        }
+        SeiProExportarDoc.exportarParaGoogleDocs(origDoc)
+            .then(function(res) {
+                if (res && res.copiado) {
+                    icon.attr('class','fas fa-thumbs-up');
+                    mostrarAvisoExportacaoDoc('Documento copiado com formatacao! Pressione Ctrl+V na aba do Google Docs.', false);
+                } else {
+                    mostrarAvisoExportacaoDoc('Nao foi possivel copiar o documento para a area de transferencia.', true);
+                }
+                setTimeout(function(){ icon.attr('class','fab fa-google-drive'); }, 1200);
+            })
+            .catch(function(err) {
+                console.error('SEI Pro: erro ao exportar para Google Docs', err);
+                mostrarAvisoExportacaoDoc('Erro ao preparar documento para o Google Docs.', true);
+                icon.attr('class','fab fa-google-drive');
+            });
+    };
+
+    var libs = [];
+    if (typeof SeiProExportarDoc === 'undefined') libs.push('js/lib/sei-pro-exportar-doc.js');
+    carregarScriptsExportacaoDoc(libs, executar);
 }
 function setHtmlProtocoloAlterar() {
     var ifrVisualizacao = getContentsVisualizacaoPro();
